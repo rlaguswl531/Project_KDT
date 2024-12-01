@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="user-scalable=no, initial-scale=1.0, maximum-scale=1.0, width=device-width" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>리소스 모니터링 - 네트워크 관리 시스템</title>
+
+    <!-- js -->
+    <script src="https://code.jquery.com/jquery-latest.min.js"></script>
+    <script src="https://cdn.socket.io/4.5.1/socket.io.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- reset -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/reset.css') }}" />
+    
+    <!-- css -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xeicon@2.3.3/xeicon.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+
+    <style>
+        /* 기본 스타일 */
+        body {
+            background-color: #181b1f;
+            color: #d8d9da;
+            font-family: 'Pretendard', sans-serif;
+        }
+
+        /* 테이블 스타일 */
+        table {
+            width: 100%; 
+            margin: 20px auto; 
+            border-collapse: collapse; 
+            font-size: 15px; 
+            background-color: #212327;
+            color: #d8d9da;
+        }
+
+        th, td {
+            padding: 10px; 
+            text-align: center; 
+            border: 1px solid #2c3235; 
+        }
+
+        th {
+            background-color: #2c2f35; 
+        }
+
+        /* 차트 스타일 */
+        canvas {
+            max-width: 1320px; 
+            width: 100%; 
+            height: 440px; 
+            margin: 20px auto; 
+        }
+
+        /* 제목 스타일 */
+        .title {
+            font-size: 24px; 
+            font-weight: bold; 
+            text-align: center; 
+            margin: 20px 0; 
+        }
+
+        /* 드롭다운 스타일 */
+        .dropdown {
+            margin: 30px auto; 
+            text-align: center; 
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="inner">
+            <a href="{{ url_for('dashboard') }}" class="logo">
+                <img src="{{ url_for('static', filename='aws_logo.png') }}" alt="로고 이미지" />
+            </a>
+            <div class="menu">
+                <a href="{{ url_for('user_info') }}" class="login">회원정보</a>
+                <a href="{{ url_for('login') }}" class="login"><i class="xi-log-in"></i>로그인</a>
+                <div class="search">
+                    <input type="text" placeholder="검색어를 입력하세요." />
+                    <button class="xi-search"></button>
+                </div>
+            </div>
+        </div>
+        <nav>
+            <a href="{{ url_for('dashboard') }}" class="active"><i class="xi-home"></i>메인메뉴</a>
+            <a href="{{ url_for('dashboard2') }}"><i class="xi-desktop"></i>공지사항</a>
+            <a href="{{ url_for('dashboard3') }}"><i class="xi-security"></i>정책설정</a>
+            <a href="{{ url_for('dashboard4') }}"><i class="xi-book-o"></i>리포트</a>
+            <a href="#0"><i class="xi-user"></i>사용자관리</a>
+            <a href="#0"><i class="xi-line-weight"></i>기타설정</a>
+        </nav>
+    </header>
+
+    <main>
+        <aside class="sidebar">
+            <ul class="menu">
+                <li><a href="{{ url_for('dashboard') }}"><i class="xi-cloud-o"></i>대시보드</a></li>
+                <li><a href="{{ url_for('security_alerts') }}"><i class="xi-error-o"></i>보안 알림</a></li>
+                <li><a href="{{ url_for('full_monitoring') }}"><i class="xi-desktop"></i>전체 모니터링</a></li>
+                <li class="active"><a href="{{ url_for('api_monitoring') }}"><i class="xi-desktop"></i>API 모니터링</a></li>
+                <li><a href="{{ url_for('aws_integration') }}"><i class="xi-user-plus-o"></i>AWS 계정 연동</a></li>
+                <li><a href="{{ url_for('account_management') }}"><i class="xi-profile-o"></i>계정 관리</a></li>
+            </ul>
+        </aside>
+
+        <div class="container">
+            <section>
+                <h4 class="title">실시간 API 호출 모니터링</h4>
+                <canvas id="resourceChart"></canvas>
+            </section>
+
+            <script>
+                async function fetchEC2Instances() {
+                    const response = await fetch('/api/ec2_instances');
+                    if (!response.ok) {
+                        console.error('Failed to fetch EC2 instances');
+                        return [];
+                    }
+                    const data = await response.json();
+                    return data.instances; // 실제 EC2 인스턴스 데이터 반환
+                }
+
+                async function initChart() {
+                    const instances = await fetchEC2Instances();
+                    const labels = instances.map(instance => instance.name);
+                    const resourceChartCtx = document.getElementById('resourceChart').getContext('2d');
+                    const resourceChart = new Chart(resourceChartCtx, {
+                        type: 'bar',
+                        data: {
+                            labels: labels, // EC2 인스턴스 이름
+                            datasets: [{
+                                label: 'API 호출',
+                                data: Array(labels.length).fill(0), // 초기값
+                                backgroundColor: 'rgba(87, 148, 242, 0.5)',
+                                borderColor: 'rgba(87, 148, 242, 1)',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            scales: {
+                                x: {
+                                    beginAtZero: true,
+                                    min: 0,
+                                    max: 100,
+                                },
+                                y: {
+                                    beginAtZero: true,
+                                    min: 0,
+                                    max: 100,
+                                }
+                            },
+                            animation: {
+                                duration: 500,
+                                easing: 'easeInOutQuad'
+                            }
+                        }
+                    });
+
+                    // 주기적 데이터 업데이트 (더미 데이터)
+                    setInterval(() => {
+                        const dummyData = Array(labels.length).fill(0).map(() => Math.floor(Math.random() * 100));
+                        updateResourceChart(resourceChart, dummyData);
+                    }, 3000); // 3초마다 데이터 업데이트
+                }
+
+                function updateResourceChart(chart, newData) {
+                    chart.data.datasets[0].data = newData;
+                    chart.update();
+                }
+
+                // 차트 초기화
+                initChart();
+            </script>
+        </div>
+    </main>
+</body>
+</html>

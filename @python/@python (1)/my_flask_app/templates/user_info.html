@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>회원정보</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xeicon@2.3.3/xeicon.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <style>
+        body {
+            font-family: 'Pretendard', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+            text-align: center; /* 모든 내용을 가운데 정렬 */
+        }
+        header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 1rem 2rem;
+        }
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .info {
+            margin-bottom: 2rem;
+        }
+        .info p {
+            margin: 0.5rem 0;
+        }
+        .buttons {
+            display: flex; /* 플렉스 박스를 활성화하여 정렬 */
+            justify-content: center; /* 수평으로 가운데 정렬 */
+            align-items: center; /* 수직으로 가운데 정렬 */
+            gap: 1rem; /* 버튼 간의 간격 설정 */
+            margin-top: 2rem; /* 상단 여백 */
+        }
+        .btn {
+            padding: 0.75rem 1.5rem; /* 버튼 내부 여백 */
+            font-size: 1rem; /* 폰트 크기 */
+            text-align: center; /* 텍스트 중앙 정렬 */
+            text-decoration: none; /* 링크 밑줄 제거 */
+            border-radius: 4px; /* 모서리 둥글게 */
+            cursor: pointer; /* 마우스 포인터 변경 */
+            flex-grow: 0; /* 버튼 크기를 고정 (동일 크기로 강제하지 않음) */
+        }
+        .btn-primary {
+            background-color: #007BFF; /* 파란색 배경 */
+            color: white; /* 흰색 텍스트 */
+            border: none;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3; /* 호버 시 더 어두운 파란색 */
+        }
+        .btn-danger {
+            background-color: #FF4D4F; /* 빨간색 배경 */
+            color: white; /* 흰색 텍스트 */
+            border: none;
+        }
+        .btn-danger:hover {
+            background-color: #cc0000; /* 호버 시 더 어두운 빨간색 */
+        }
+        .btn-form {
+            display: flex;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <h1>회원정보</h1>
+</header>
+
+<div class="container">
+    <div class="title">안녕하세요, {{ username }}님!</div>
+
+    <div class="info">
+        <p><strong>이름:</strong> {{ username }}</p>
+        <p><strong>이메일:</strong> {{ email }}</p>
+        <p><strong>가입일:</strong> {{ join_date }}</p>
+    </div>
+
+    <div class="buttons">
+        <!-- 메인 페이지 돌아가기 버튼 -->
+        <a href="{{ url_for('dashboard') }}" class="btn btn-primary">메인 페이지 돌아가기</a>
+    
+        <!-- 로그아웃 버튼 -->
+        <form action="{{ url_for('logout') }}" method="post" class="btn-form">
+            {{ form.hidden_tag() }} <!-- CSRF 토큰 추가 -->
+            <button type="submit" class="btn btn-danger">로그아웃</button>
+        </form>
+    </div>
+</div>
+</body>
+</html>

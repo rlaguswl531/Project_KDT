@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="user-scalable=no, initial-scale=1.0, maximum-scale=1.0, width=device-width" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>실시간 EC2 리소스 모니터링</title>
+
+    <!-- js -->
+    <script src="https://code.jquery.com/jquery-latest.min.js"></script>
+    <script src="https://cdn.socket.io/4.5.1/socket.io.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/reset.css') }}" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xeicon@2.3.3/xeicon.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+
+    <style>
+        /* 테이블 스타일 */
+        table {
+            width: 80%; 
+            max-width: 800px; 
+            margin: 20px auto; 
+            border-collapse: collapse; 
+            font-size: 15px; 
+        }
+
+        th, td {
+            padding: 10px; 
+            text-align: center; 
+            border: 1px solid #ddd; 
+        }
+
+        th {
+            background-color: #f2f2f2; 
+        }
+
+        /* 차트 스타일 */
+        canvas {
+            max-width: 1300px; 
+            width: 100%; 
+            height: 440px; 
+            margin: 20px auto; 
+        }
+
+        /* 제목 스타일 */
+        .title {
+            font-size: 24px; 
+            font-weight: bold; 
+            text-align: center; 
+            margin: 20px 0; 
+        }
+
+        /* 드롭다운 스타일 */
+        .dropdown {
+            margin: 30px auto; 
+            text-align: center; 
+        }
+
+        /* 모달 스타일 */
+        .modal {
+            display: none; 
+            position: fixed; 
+            z-index: 1000; 
+            left: 0;
+            top: 0;
+            width: 100%; 
+            height: 100%; 
+            overflow: auto; 
+            background-color: rgba(0, 0, 0, 0.4); 
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto; 
+            padding: 20px; 
+            border: 1px solid #888;
+            width: 80%; 
+            max-width: 600px; 
+        }
+
+        .close {
+            color: #aaa;
+            float: right; 
+            font-size: 28px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="inner">
+            <a href="{{ url_for('dashboard') }}" class="logo">
+                <img src="{{ url_for('static', filename='aws_logo.png') }}" alt="로고 이미지" />
+            </a>
+            <div class="menu">
+                <a href="{{ url_for('user_info') }}" class="login">회원정보</a>
+                <a href="{{ url_for('login') }}" class="login"><i class="xi-log-in"></i>로그인</a>
+                <div class="search">
+                    <input type="text" placeholder="검색어를 입력하세요." />
+                    <button class="xi-search"></button>
+                </div>
+            </div>
+        </div>
+        <nav>
+            <a href="{{ url_for('dashboard') }}" class="active"><i class="xi-home"></i>메인메뉴</a>
+            <a href="{{ url_for('dashboard2') }}"><i class="xi-desktop"></i>공지사항</a>
+            <a href="{{ url_for('dashboard3') }}"><i class="xi-security"></i>정책설정</a>
+            <a href="{{ url_for('dashboard4') }}"><i class="xi-book-o"></i>리포트</a>
+            <a href="#0"><i class="xi-user"></i>사용자관리</a>
+            <a href="#0"><i class="xi-line-weight"></i>기타설정</a>
+        </nav>
+    </header>
+
+    <main>
+        <aside class="sidebar">
+            <ul class="menu">
+                <li class="active">
+                    <a href="{{ url_for('dashboard') }}"><i class="xi-cloud-o"></i>대시보드</a>
+                </li>
+                <li>
+                    <a href="{{ url_for('security_alerts') }}"><i class="xi-error-o"></i>보안 알림</a>
+                </li>
+                <li>
+                    <a href="{{ url_for('full_monitoring') }}"><i class="xi-desktop"></i>전체 모니터링</a>
+                </li>
+                <li>
+                    <a href="{{ url_for('api_monitoring') }}"><i class="xi-desktop"></i>API 모니터링</a>
+                </li>
+                <li>
+                    <a href="{{ url_for('aws_integration') }}"><i class="xi-user-plus-o"></i>AWS 계정 연동</a>
+                </li>
+                <li>
+                    <a href="{{ url_for('account_management') }}"><i class="xi-profile-o"></i>계정 관리</a>
+                </li>
+            </ul>
+        </aside>
+
+        <div class="container">
+            <section class="ec2">
+                <div class="inner">
+                    <h3 class="title">실시간 EC2 리소스 모니터링</h3>
+
+                    <!-- 드롭다운 메뉴 -->
+                    <div class="dropdown">
+                        <select id="resourceSelect" onchange="changeResource()">
+                            <option value="cpu" selected>CPU 사용량</option>
+                            <option value="disk">DISK 사용량</option>
+                            <option value="ram">RAM 사용량</option>
+                            <option value="network">네트워크 트래픽</option>
+                        </select>
+                    </div>
+
+                    <!-- 실시간 리소스 차트 -->
+                    <canvas id="resourceChart" width="600" height="300"></canvas>
+
+                    <!-- 실시간 모니터링 표 -->
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>인스턴스 이름</th>
+                                <th>상태</th>
+                                <th>CPU 사용률 (%)</th>
+                                <th>디스크 사용량 (%)</th>
+                                <th>RAM 사용량 (%)</th>
+                                <th>네트워크 트래픽 (KB/s)</th>
+                                <th>경보 상태</th>
+                                <th>상세 보기</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ec2-table-body">
+                            <!-- 실시간 데이터가 동적으로 추가됩니다 -->
+                        </tbody>
+                    </table>
+
+                    <!-- 상세보기 모달 -->
+                    <div id="instance-details" class="modal">
+                        <div class="modal-content">
+                            <span class="close" onclick="closeModal()">&times;</span>
+                            <h3 id="instance-id-detail"></h3>
+                            <table id="detail-table">
+                                <thead>
+                                    <tr>
+                                        <th>상태</th>
+                                        <th>CPU 사용률</th>
+                                        <th>디스크 사용량</th>
+                                        <th>RAM 사용량</th>
+                                        <th>네트워크 트래픽</th>
+                                        <th>경보 상태</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="detail-table-body">
+                                    <!-- 상세 정보가 동적으로 추가됩니다 -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script>
+        const socket = io();  // Socket.IO 초기화
+        let currentResource = 'cpu'; // 현재 선택된 리소스
+        const resourceChartCtx = document.getElementById('resourceChart').getContext('2d');
+        const resourceChart = new Chart(resourceChartCtx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [] // 각 인스턴스별 데이터셋을 빈 배열로 초기화
+            }
+        });
+
+        // 서버로 데이터 요청
+        socket.emit('request_data');
+
+        // 서버에서 데이터 수신
+        socket.on('update_table', (data) => {
+            const tableBody = document.getElementById('ec2-table-body');
+            tableBody.innerHTML = ''; // 기존 데이터 초기화
+            data.forEach((item) => {
+                const alertStatus = item.cpu > 80 ? '경고' : '정상';
+
+                const row = `
+                    <tr>
+                        <td>${item.name}</td>
+                        <td>${item.status}</td>
+                        <td>${item.cpu.toFixed(2)}</td> <!-- CPU 사용량 -->
+                        <td>${item.disk.toFixed(2)}</td> <!-- 디스크 사용량 -->
+                        <td>${item.ram.toFixed(2)}</td>  <!-- RAM 사용량 -->
+                        <td>${(item.network / 1024).toFixed(2)} KB/s</td> <!-- 네트워크 트래픽(KB/s) -->
+                        <td>${alertStatus}</td>
+                        <td>
+                            <button onclick="showDetails('${item.name}', '${item.status}', ${item.cpu.toFixed(2)}, ${item.disk.toFixed(2)}, ${item.ram.toFixed(2)}, ${(item.network / 1024).toFixed(2)}, '${alertStatus}')">상세 보기</button>
+                        </td>
+                    </tr>
+                `;
+                tableBody.innerHTML += row; // 새로운 데이터 추가
+            });
+
+            // 현재 선택된 리소스 차트 업데이트
+            updateResourceChart(data);
+        });
+
+        // 경고 팝업 함수
+        function showAlertPopup(instanceName, cpuUsage) {
+            const popupMessage = `${instanceName} 인스턴스에서 경고가 발생했습니다.\nCPU 사용률: ${cpuUsage}%`;
+            
+            // 팝업 모달 생성
+            const alertModal = document.createElement('div');
+            alertModal.className = 'modal';
+            alertModal.innerHTML = `
+                <div class="modal-content">
+                    <span class="close" onclick="this.parentElement.parentElement.remove()">&times;</span>
+                    <h3>경고</h3>
+                    <p>${popupMessage}</p>
+                </div>
+            `;
+            document.body.appendChild(alertModal);
+            alertModal.style.display = 'block'; // 모달 표시
+        }
+
+        // 5초마다 데이터 갱신 요청
+        setInterval(() => {
+            socket.emit('request_data');
+        }, 5000);
+
+        // 리소스 차트 업데이트
+        function updateResourceChart(data) {
+            const labels = resourceChart.data.labels;
+            const datasets = resourceChart.data.datasets;
+
+            // 타임스탬프 추가
+            const timestamp = new Date().toLocaleTimeString();
+            labels.push(timestamp);
+
+            // 각 인스턴스별 데이터셋 추가
+            data.forEach((item) => {
+                let value;
+                switch (currentResource) {
+                    case 'cpu':
+                        value = item.status === '중지됨' ? 0 : item.cpu;
+                        break;
+                    case 'disk':
+                        value = item.status === '중지됨' ? 0 : item.disk; // 실제 데이터 사용
+                        break;
+                    case 'ram':
+                        value = item.status === '중지됨' ? 0 : item.ram; // 실제 데이터 사용
+                        break;
+                    case 'network':
+                        value = item.network;
+                        break;
+                }
+
+                // 각 인스턴스에 대한 데이터셋 추가
+                let dataset = datasets.find(ds => ds.label === item.name);
+                if (!dataset) {
+                    dataset = {
+                        label: item.name, // 인스턴스 이름
+                        data: [],
+                        fill: false,
+                        borderColor: getRandomColor(), // 랜덤 색상으로 구분
+                        tension: 0.1
+                    };
+                    datasets.push(dataset);
+                }
+                dataset.data.push(value); // 올바른 값을 추가
+            });
+
+            // 60초마다 오래된 데이터는 지우기
+            if (labels.length > 60) {
+                labels.shift();
+                datasets.forEach(dataset => dataset.data.shift()); // 각 데이터셋에서 오래된 데이터 삭제
+            }
+
+            resourceChart.update();
+        }
+
+        // 랜덤 색상 생성 함수
+        function getRandomColor() {
+            const letters = '0123456789ABCDEF';
+            let color = '#';
+            for (let i = 0; i < 6; i++) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
+        }
+
+        // 리소스 변경 시 호출되는 함수
+        function changeResource() {
+            const selectElement = document.getElementById('resourceSelect');
+            currentResource = selectElement.value; // 현재 선택된 리소스 업데이트
+
+            // 차트 데이터 초기화
+            resourceChart.data.labels = [];
+            resourceChart.data.datasets = []; // 데이터셋 초기화
+            resourceChart.update(); // 차트 리셋
+        }
+
+        // 상세보기 클릭 시 동적으로 정보 표시
+        function showDetails(instanceName, status, cpu, disk, ram, network, alertStatus) {
+            document.getElementById('instance-id-detail').innerText = `${instanceName} 상세 보기`;
+            document.getElementById('detail-table-body').innerHTML = `
+                <tr>
+                    <td>${status}</td>
+                    <td>${cpu}%</td>
+                    <td>${disk}%</td>
+                    <td>${ram}%</td>
+                    <td>${network} KB/s</td>
+                    <td>${alertStatus}</td>
+                </tr>
+            `;
+            document.getElementById('instance-details').style.display = 'block'; // 모달 표시
+        }
+
+        // 모달 닫기 함수
+        function closeModal() {
+            document.getElementById('instance-details').style.display = 'none'; // 모달 숨김
+        }
+
+        // 모달 외부 클릭 시 닫기
+        window.onclick = function(event) {
+            const modal = document.getElementById('instance-details');
+            if (event.target === modal) {
+                closeModal(); // 모달 닫기
+            }
+        }
+    </script>
+</body>
+</html>

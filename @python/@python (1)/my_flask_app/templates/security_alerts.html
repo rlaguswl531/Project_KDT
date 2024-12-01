@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>{{ username }}의 대시보드</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/reset.css') }}" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xeicon@2.3.3/xeicon.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+    <script>
+        function fetchLogs() {
+            fetch('/logs')
+                .then(response => response.json())
+                .then(data => {
+                    const logsContainer = document.getElementById('log-table-body');
+                    logsContainer.innerHTML = "";  // 기존 로그 비우기
+                    data['logs'].forEach(log => {
+                        const row = document.createElement('tr');
+                        const timestampCell = document.createElement('td');
+                        timestampCell.textContent = new Date(log['timestamp']).toLocaleString();
+                        const messageCell = document.createElement('td');
+                        messageCell.textContent = log['message'];
+                        row.appendChild(timestampCell);
+                        row.appendChild(messageCell);
+                        logsContainer.appendChild(row);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching logs:', error);
+                });
+        }
+
+        // 현재 시각 업데이트 함수
+        function updateCurrentTime() {
+            const currentTimeElement = document.getElementById('current-time');
+            currentTimeElement.textContent = new Date().toLocaleString();
+        }
+
+        // 페이지 로드 시 한 번 호출하고, 이후 5초마다 갱신
+        window.onload = function() {
+            fetchLogs();
+            updateCurrentTime();  // 페이지 로드 시 현재 시각 표시
+            setInterval(fetchLogs, 5000);  // 5초마다 실시간 갱신
+            setInterval(updateCurrentTime, 1000);  // 1초마다 현재 시각 갱신
+        }
+    </script>
+</head>
+
+<body>
+    <header>
+        <div class="inner">
+            <a href="{{ url_for('dashboard') }}" class="logo">
+                <img src="{{ url_for('static', filename='aws_logo.png') }}" alt="로고 이미지" /> 
+            </a>
+            <div class="menu">
+                <a href="{{ url_for('user_info') }}" class="login">회원정보</a>
+                <a href="{{ url_for('login') }}" class="login"><i class="xi-log-in"></i>로그인</a>
+                <div class="search">
+                    <input type="text" placeholder="검색어를 입력하세요." />
+                    <button class="xi-search"></button>
+                </div>
+            </div>
+        </div>
+        <nav>
+            <a href="{{ url_for('dashboard') }}" class="active"><i class="xi-home"></i>메인메뉴</a>
+            <a href="{{ url_for('dashboard2') }}"><i class="xi-desktop"></i>공지사항</a>
+            <a href="{{ url_for('dashboard3') }}"><i class="xi-security"></i>정책설정</a>
+            <a href="{{ url_for('dashboard4') }}"><i class="xi-book-o"></i>리포트</a>
+            <a href="#0"><i class="xi-user"></i>사용자관리</a>
+            <a href="#0"><i class="xi-line-weight"></i>기타설정</a>
+        </nav>
+    </header>
+
+    <main>
+        <aside class="sidebar">
+            <ul class="menu">
+                <li>
+                    <a href="{{ url_for('dashboard') }}"><i class="xi-dashboard-o"></i>대시보드</a>
+                </li>
+                <li class="active">
+                    <a href="{{ url_for('security_alerts') }}"><i class="xi-error-o"></i>보안 알림</a>
+                </li>
+                <li>
+                    <a href="{{ url_for('full_monitoring') }}"><i class="xi-desktop"></i>전체 모니터링</a>
+                </li>
+                <li>
+                    <a href="{{ url_for('api_monitoring') }}"><i class="xi-network-server"></i>API 모니터링</a>
+                </li>
+                <li>
+                    <a href="{{ url_for('aws_integration') }}"><i class="xi-user-plus-o"></i>AWS 계정 연동</a>
+                </li>
+                <li>
+                    <a href="{{ url_for('account_management') }}"><i class="xi-profile-o"></i>계정 관리</a>
+                </li>
+            </ul>
+        </aside>
+
+        <div class="container">
+            <section>
+                <h3 style="text-align: center; font-size: 2rem;">보안 알림</h3>
+                <h4 style="text-align: center; font-size: 1.5rem;">CloudWatch Logs</h4>
+                <div style="text-align: center; margin-top: 20px; font-size: 2rem;">
+                    현재 시각: <span id="current-time" style="font-size: 2rem;"></span>
+                </div>               
+                <table border="1">
+                    <thead>
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>Message</th>
+                        </tr>
+                    </thead>
+                    <tbody id="log-table-body">
+                        {% for log in logs %}
+                        <tr>
+                            <td>{{ log.timestamp }}</td>
+                            <td>{{ log.message }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+ 
+            </section>
+        </div>
+    </main>
+</body>
+</html>

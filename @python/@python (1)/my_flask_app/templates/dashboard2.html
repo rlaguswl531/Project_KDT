@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>메뉴2 - 네트워크 관리 시스템</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/reset.css') }}" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xeicon@2.3.3/xeicon.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+
+<body>
+    <header>
+        <div class="inner">
+            <a href="{{ url_for('dashboard') }}" class="logo">
+                <img src="{{ url_for('static', filename='aws_logo.png') }}" alt="로고 이미지" /> 
+            </a>
+            <div class="menu">
+                <a href="{{ url_for('user_info') }}" class="login">회원정보</a>
+                <a href="{{ url_for('login') }}" class="login"><i class="xi-log-in"></i>로그인</a>
+                <div class="search">
+                    <input type="text" placeholder="검색어를 입력하세요." />
+                    <button class="xi-search"></button>
+                </div>
+            </div>
+        </div>
+        <nav>
+            <a href="{{ url_for('dashboard') }}"><i class="xi-error-o"></i>메뉴1</a>
+            <a href="{{ url_for('dashboard2') }}" class="active"><i class="xi-desktop"></i>메뉴2</a>
+            <a href="{{ url_for('dashboard3') }}"><i class="xi-network-server"></i>메뉴3</a>
+            <a href="{{ url_for('dashboard4') }}"><i class="xi-dashboard-o"></i>메뉴4</a>
+            <a href="#0"><i class="xi-palette"></i>메뉴5</a>
+            <a href="#0"><i class="xi-line-weight"></i>메뉴6</a>
+        </nav>
+    </header>
+
+    <main>
+        <aside class="sidebar">
+            <ul class="menu">
+                <li>
+                    <a href="#0"><i class="xi-dashboard-o"></i>대시보드</a>
+                </li>
+                <li>
+                    <a href="#0"><i class="xi-error-o"></i>보안 알림</a>
+                </li>
+                <li class="active">
+                    <a href="{{ url_for('dashboard2') }}"><i class="xi-desktop"></i>전체 모니터링</a>
+                </li>
+                <li>
+                    <a href="#0"><i class="xi-network-server"></i>API 모니터링</a>
+                </li>
+                <li>
+                    <a href="#0"><i class="xi-user-plus-o"></i>AWS 계정 연동</a>
+                </li>
+                <li>
+                    <a href="#0"><i class="xi-profile-o"></i>계정 관리</a>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- 메뉴2 콘텐츠 -->
+        <div class="container">
+            <section class="menu2-content">
+                <div class="inner">
+                    <h3 class="title">전체 모니터링 (메뉴2)</h3>
+                    <p>이 페이지는 네트워크 관리 시스템의 "전체 모니터링(메뉴2)"에 대한 정보를 제공합니다.</p>
+
+                    <!-- 예제 테이블 -->
+                    <table border="1" style="width: 100%; border-collapse: collapse; text-align: center;">
+                        <thead style="background-color: #f4f4f4;">
+                            <tr>
+                                <th>ID</th>
+                                <th>모니터링 항목</th>
+                                <th>상태</th>
+                                <th>업데이트 시간</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- 예제 데이터 -->
+                            <tr>
+                                <td>1</td>
+                                <td>서버 CPU 사용량</td>
+                                <td style="color: green;">정상</td>
+                                <td>2024-11-22 10:00:00</td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td>네트워크 트래픽</td>
+                                <td style="color: red;">경고</td>
+                                <td>2024-11-22 10:05:00</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <p style="margin-top: 20px;">자세한 정보를 보려면 각 항목을 클릭하세요.</p>
+
+                    <button style="
+                        padding: 10px 20px;
+                        background-color: #007BFF;
+                        color: white;
+                        border: none;
+                        border-radius: 5px;
+                        cursor: pointer;
+                    ">추가 모니터링 설정</button>
+                </div>
+            </section>
+        </div>
+    </main>
+</body>
+</html>

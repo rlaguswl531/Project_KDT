@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>회원가입 페이지</title>
+    <style>
+        @font-face {
+            font-family: 'GmarketSans';
+            src: url('/static/fonts/GmarketSans.ttf') format('truetype');
+        }
+
+        body {
+            display: flex;
+            flex-direction: column; /* 세로 방향으로 정렬 */
+            height: 100vh; /* 전체 화면 높이 */
+            justify-content: center; /* 수직 가운데 정렬 */
+            align-items: center; /* 수평 가운데 정렬 */
+            margin: 0; /* 기본 마진 제거 */
+            font-family: 'GmarketSans', sans-serif; /* 폰트 설정 */
+        }
+        .register-container {
+            background-color: #f9f9f9; /* 배경색 */
+            border: 3px solid #0073e6; /* 회원가입 폼 외곽선 색상 및 두께 */
+            border-radius: 10px; /* 모서리 둥글게 */
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* 그림자 효과 */
+            padding: 20px; /* 내부 여백 */
+            width: 90%; /* 고정된 너비를 창의 90%로 설정 */
+            max-width: 400px; /* 최대 너비 설정 */
+        }
+        h1 {
+            color: #000000; /* 제목 색상 */
+            text-align: center; /* 제목 가운데 정렬 */
+        }
+        .error-message {
+            color: red; /* 오류 메시지 색상 */
+        }
+        label {
+            display: block; /* 블록 요소로 설정하여 레이블과 입력 필드가 세로로 정렬되게 함 */
+            margin-bottom: 5px; /* 레이블과 입력 필드 간격 */
+        }
+        input[type="email"],
+        input[type="password"],
+        input[type="text"] {
+            border: 1px solid #ccc; /* 입력 필드 테두리 */
+            border-radius: 5px; /* 입력 필드 모서리 둥글게 */
+            margin-bottom: 15px; /* 입력 필드 간격 */
+            padding: 10px; /* 입력 필드 내부 여백 조정 */
+            width: 100%; /* 입력 필드의 너비를 컨테이너에 맞춤 */
+            box-sizing: border-box; /* 패딩과 테두리 포함하여 너비 계산 */
+        }
+        input[type="submit"] {
+            background-color: #0073e6; /* 버튼 배경색 */
+            border: none; /* 버튼 테두리 제거 */
+            border-radius: 5px; /* 버튼 모서리 둥글게 */
+            color: white; /* 버튼 텍스트 색상 */
+            cursor: pointer; /* 마우스 커서 변경 */
+            padding: 10px; /* 버튼 내부 여백 */
+            width: 100%; /* 버튼의 너비를 컨테이너에 맞춤 */
+        }
+        input[type="submit"]:hover {
+            background-color: #005bb5; /* 버튼 호버 색상 */
+        }
+        .link-container {
+            margin-top: 15px; /* 링크와 버튼 간격 */
+            text-align: center; /* 링크 가운데 정렬 */
+        }
+        .link-container a {
+            color: #0073e6; /* 링크 색상 */
+            text-decoration: none; /* 밑줄 제거 */
+            font-weight: bold; /* 링크를 굵게 */
+            padding: 10px; /* 링크 내부 여백 */
+            display: inline-block; /* 블록 요소로 설정하여 패딩 적용 */
+            border: 2px solid #0073e6; /* 링크 테두리 설정 */
+            border-radius: 5px; /* 링크 모서리 둥글게 */
+            transition: background-color 0.3s, color 0.3s; /* 부드러운 색상 전환 효과 */
+        }
+        .link-container a:hover {
+            background-color: #0073e6; /* 호버 시 배경색 */
+            color: white; /* 호버 시 텍스트 색상 */
+            text-decoration: none; /* 호버 시 밑줄 제거 */
+        }
+    </style>
+</head>
+<body>
+    <div class="register-container">
+        <h1>회원가입</h1>
+        <form action="/register" method="post">
+            <label for="username">아이디:</label>
+            <input type="text" id="username" name="username" required>
+            <label for="password">비밀번호:</label>
+            <input type="password" id="password" name="password" required>
+            <label for="email">이메일:</label>
+            <input type="email" id="email" name="email" required>
+            <input type="submit" value="회원가입">
+        </form>
+        <div class="link-container">
+            <a href="/login">로그인 페이지로 이동</a>
+        </div>
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            <ul>
+            {% for message in messages %}
+              <li class="error-message">{{ message }}</li>
+            {% endfor %}
+            </ul>
+          {% endif %}
+        {% endwith %}
+    </div>
+</body>
+</html>

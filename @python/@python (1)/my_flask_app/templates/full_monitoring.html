@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>전체 모니터링 - 네트워크 관리 시스템</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/reset.css') }}" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xeicon@2.3.3/xeicon.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+    <style>
+        .banner {
+            width: 200px; /* 원하는 너비로 조절 */
+            height: 100px; /* 원하는 높이로 조절 */
+            background-color: #4CAF50; /* 배경색 */
+            color: white; /* 글자색 */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            border-radius: 10px; /* 모서리 둥글게 */
+            text-decoration: none; /* 링크의 기본 밑줄 제거 */
+            margin: 20px auto; /* 위 아래 여백과 가운데 정렬 */
+        }
+        .banner:hover {
+            background-color: #45a049; /* 마우스 오버 시 색상 변경 */
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="inner">
+            <a href="{{ url_for('dashboard') }}" class="logo">
+                <img src="{{ url_for('static', filename='aws_logo.png') }}" alt="로고 이미지" /> 
+            </a>
+            <div class="menu">
+                <a href="{{ url_for('user_info') }}" class="login">회원정보</a>
+                <a href="{{ url_for('login') }}" class="login"><i class="xi-log-in"></i>로그인</a>
+                <div class="search">
+                    <input type="text" placeholder="검색어를 입력하세요." />
+                    <button class="xi-search"></button>
+                </div>
+            </div>
+        </div>
+        <nav>
+            <a href="{{ url_for('dashboard') }}" class="active"><i class="xi-home"></i>메인메뉴</a>
+            <a href="{{ url_for('dashboard2') }}"><i class="xi-desktop"></i>공지사항</a>
+            <a href="{{ url_for('dashboard3') }}"><i class="xi-security"></i>정책설정</a>
+            <a href="{{ url_for('dashboard4') }}"><i class="xi-book-o"></i>리포트</a>
+            <a href="#0"><i class="xi-user"></i>사용자관리</a>
+            <a href="#0"><i class="xi-line-weight"></i>기타설정</a>
+        </nav>
+    </header>
+
+    <main>
+        <aside class="sidebar">
+            <ul class="menu">
+                <li>
+                    <a href="{{ url_for('dashboard') }}"><i class="xi-dashboard-o"></i>대시보드</a>
+                </li>
+                <li>
+                    <a href="{{ url_for('security_alerts') }}"><i class="xi-error-o"></i>보안 알림</a>
+                </li>
+                <li class="active">
+                    <a href="{{ url_for('full_monitoring') }}"><i class="xi-desktop"></i>전체 모니터링</a>
+                </li>
+                <li>
+                    <a href="{{ url_for('api_monitoring') }}"><i class="xi-network-server"></i>API 모니터링</a>
+                </li>
+                <li>
+                    <a href="{{ url_for('aws_integration') }}"><i class="xi-user-plus-o"></i>AWS 계정 연동</a>
+                </li>
+                <li>
+                    <a href="{{ url_for('account_management') }}"><i class="xi-profile-o"></i>계정 관리</a>
+                </li>
+            </ul>
+        </aside>
+        <div class="container">
+            <section>
+                <h3>Grafana 모니터링</h3>
+                <!-- 여기에 전체 모니터링 관련 콘텐츠 추가 -->
+                
+                <!-- 배너 추가 -->
+                <a href="https://g-0fcccca017.grafana-workspace.ap-northeast-2.amazonaws.com/d/ee56suif3e874f/new-dashboard?orgId=1" class="banner">그라파나 사이트 바로가기</a>
+            </section>
+        </div>
+    </main>
+</body>
+</html>
